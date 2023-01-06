@@ -199,6 +199,7 @@ sealed abstract class TermsCollector extends SignatureProcessor[TermSignature] {
     case f: ScFunction                => Seq(new PhysicalMethodSignature(f, subst, renamed = name, exportedIn = exportedIn))
     case o: ScObject                  => Seq(TermSignature(o, subst, renamed = name, exportedIn = exportedIn))
     case c: ScTypeDefinition          => syntheticSignaturesFromInnerClass(c, subst)
+    case t: ScTypeAlias               => Seq(TermSignature(t, subst, renamed = name, exportedIn = exportedIn))
     case ext: ScExtension =>
       ext.extensionMethods
         .map(m =>

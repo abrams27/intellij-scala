@@ -567,12 +567,15 @@ object ScalaPsiUtil {
 
   def superValsSignatures(x: PsiNamedElement, withSelfType: Boolean = false): Seq[TermSignature] = {
     val empty = Seq.empty
-    val typed: ScTypedDefinition = x match {
-      case x: ScTypedDefinition => x
+
+    val typedOrTypeAlias: ScNamedElement = x match {
+      case t: ScTypedDefinition => t
+      case t: ScTypeAlias => t
       case _ => return empty
     }
-    val clazz: ScTemplateDefinition = typed.nameContext match {
-      case e@(_: ScValue | _: ScVariable | _: ScObject) if e.getParent.is[ScTemplateBody] ||
+
+    val clazz: ScTemplateDefinition = typedOrTypeAlias.nameContext match {
+      case e@(_: ScValue | _: ScVariable | _: ScObject | _: ScTypeAlias) if e.getParent.is[ScTemplateBody] ||
         e.getParent.is[ScEarlyDefinitions] =>
         e.asInstanceOf[ScMember].containingClass
       case e: ScClassParameter if e.isClassMember => e.containingClass
@@ -599,8 +602,10 @@ object ScalaPsiUtil {
       //Problem is that we are building signatures over decompiled class.
     }
 
+    val typed = x.asOptionOf[ScTypedDefinition]
 
-    val beanMethods = getBeanMethods(typed)
+    val beanMethods = typed.toSeq.flatMap(getBeanMethods)
+
     beanMethods.foreach { method =>
       val sigs = TypeDefinitionMembers.getSignatures(clazz).forName(method.name)
       sigs.get(new PhysicalMethodSignature(method, ScSubstitutor.empty)) match {
