@@ -2,7 +2,7 @@ package org.jetbrains.plugins.scala.macroAnnotations
 
 import org.jetbrains.annotations.Nls
 
-import scala.annotation.{nowarn, tailrec}
+import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
@@ -28,7 +28,8 @@ object CachedMacroUtil {
 
       if (!expressionTracersEnabled(c)) {
         val message =
-          MacrosBundle.message("macros.cached.expression.tracers.are.enabled.only.for.debug.and.tests").stripMargin
+          """Expression tracers are enabled only for debug and tests purposes.
+            |Please remove additional expressions from macro annotations""".stripMargin
         abort(message)
       }
 
